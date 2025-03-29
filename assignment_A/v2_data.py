@@ -20,14 +20,14 @@ def get_fixed_data():
         # Hydrogen storage capacity
         'hydrogen_capacity': 15,
         
-        'p2h_rate': 5,
-        'h2p_rate': 5,
+        'p2h_max_rate': 5,
+        'h2p_max_rate': 5,
 
         # Electrolyzer cost
-        'electrolyzer_cost': 1,  # Reduced cost
+        'electrolyzer_cost': 1, 
 
         # Wind model parameters
-        'target_mean_wind': 4.5,  # Reduced mean wind
+        'target_mean_wind': 4.5,
         'wind_reversion_strength': 0.15,
         'extreme_event_prob_wind': 0.03,
 
@@ -35,11 +35,16 @@ def get_fixed_data():
         'mean_price': 35,
         'price_reversion_strength': 0.12,
         'wind_influence_on_price': -0.6,
-        'price_cap': 90,  # Increased price cap
-        'price_floor': 0,  # Allow occasional negative prices
+        'price_cap': 90,  
+        'price_floor': 0,
         
-
-
+        # initial values
+        'wind_power': 5,
+        'wind_power_previous': 4,
+        'price': 30,
+        'price_previous': 28,
+              
+        
         'num_timeslots': num_timeslots,
         'demand_schedule': [5 + 2 * np.sin(2 * np.pi * t / 24) for t in range(num_timeslots)]
 
