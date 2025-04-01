@@ -280,9 +280,11 @@ class ValueFunction():
     def __init__(self, T, state_dim):
         self.T = T
         self.state_dim = state_dim
-        self.weights = np.ones((T, state_dim + 1))  # +1 for the bias term
+
+        self.weights = np.ones((T, state_dim -1 + 1))  # -1 because state includes t, which we we told not to... +1 for the bias term
         
     def compute_value_explicit(self, t, state):
+        state = state[1:] # Exclude time from state
         # Append 1 for the bias term to the state
         if t >= T:
             return 0
@@ -293,6 +295,7 @@ class ValueFunction():
         return value
     
     def compute_value(self, t, states):
+        states = states[:, 1:] # Exclude time from state
         if t >= T:
             return np.zeros(states.shape[0])
         # Append 1 for the bias term to each state
@@ -302,6 +305,7 @@ class ValueFunction():
     def update(self, t, states, target_values):
         if t >= T:
             return 
+        states = states[:,1:] # Exclude time from state
         # Append 1 for the bias term to each state
         states_with_bias = np.hstack((states, np.ones((states.shape[0], 1))))
         # Solve the least squares problem to find the optimal weights
@@ -311,6 +315,7 @@ class ValueFunction():
         # Compute the squared error
         predicted_values = self.compute_value(t, states)
         return np.mean((predicted_values - target_values) ** 2)
+
     
 def sample_representative_state_pairs(I):
     T = data['num_timeslots']
@@ -326,6 +331,7 @@ def sample_representative_state_pairs(I):
             state = [t, h[t], e_on[t-1] if t > 0 else 0, wind[t], wind[t-1] if t > 0 else data['wind_power_previous'], price[t], price[t-1] if t > 0 else data['price_previous']]
             state_pairs[t, i] = state
     return state_pairs
+
 def value_minimization(V: ValueFunction,t,state_cur,scenarios, gamma,print_result=False): 
 
     t, h, e_on_tm1, wind, wind_previous, price, price_previous = state_cur
@@ -396,12 +402,15 @@ def backward_value_approx(V, state_pairs, K, data,gamma=0.9):
         for i in range(I):
             state = state_pairs[t, i]
             _, h, e_on_tm1, wind, wind_previous, price, price_previous = state
+            # we only need the 
             scenarios, scenario_probs = generate_scenarios(wind, price, wind_previous, price_previous, 1, k=K, n_samples=K)
-            _,value_targets[i] = value_minimization(V, t, state, scenarios[0], gamma)
+            _,value_targets[i] = value_minimization(V, t, state, scenarios[1], gamma)
+            
         print(V.squared_error(t, state_pairs[t], value_targets))
         V.update(t, state_pairs[t], value_targets)
         print(V.squared_error(t, state_pairs[t], value_targets))        
     return V
+
 
 
 
