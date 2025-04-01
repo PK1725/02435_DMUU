@@ -241,11 +241,17 @@ def solve_multi_stage_model(t_start,scenarios,a_set,scenario_probs,price,wind,h_
     model.non_anticipativity = ConstraintList()
     for var in vars:
         for t in range(T-1):
-            for s in range(S):
+            #for s in range(S):
                 # find s index in a_set[t]
-                s_relative = s % len(a_set[t])
-                for s_prime in a_set[t][s_relative]: 
-                    model.non_anticipativity.add(var[t, s] == var[t, s_prime])
+                # s_relative = s % len(a_set[t])
+                # for s_prime in a_set[t][s_relative]: 
+                #     model.non_anticipativity.add(var[t, s] == var[t, s_prime])
+            for a_subset in a_set[t]:
+                sprime = a_subset[0]
+                for s in a_subset:
+                    model.non_anticipativity.add(var[t, s] == var[t, sprime])
+                
+
 
     # Objective function
     def objective_rule(model):
