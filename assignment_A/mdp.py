@@ -223,8 +223,8 @@ def scenarios_to_matrices(scenarios):
 
 
 def solve_multi_stage_model(t_start,scenarios,a_set,scenario_probs,price,wind,h_0,e_on_0):
-    T = len(scenarios)
-    S = len(scenarios[-1])
+    T = price.shape[0] #Ø WAS HERE: Changed from len(scenarios). Note 'scenarios' is now an unused input
+    S = price.shape[1] #Ø WAS HERE: Changed from len(scenarios[-1])
     
     # Create a model
     model = ConcreteModel()
@@ -256,7 +256,7 @@ def solve_multi_stage_model(t_start,scenarios,a_set,scenario_probs,price,wind,h_
     # Objective function
     def objective_rule(model):
         return sum(scenario_probs[s]*(price[t,s] * model.p_grid[t,s] + data['electrolyzer_cost']*model.e_on[t-1,s]) for s in range(S) for t in range(T))
-
+    
     model.profit = Objective(rule=objective_rule, sense=minimize)
 
     model.DemandConstraint = Constraint(range(T),range(S), rule=lambda model, t,s: model.p_grid[t,s] + wind[t,s] + data['conversion_h2p']*model.e_h2p[t,s] - model.e_p2h[t,s] >= data['demand_schedule'][t_start+t])
@@ -280,6 +280,7 @@ def solve_multi_stage_model(t_start,scenarios,a_set,scenario_probs,price,wind,h_
     results = solver.solve(model, tee=False)
     #print(f"S= {S}, T={T}, n_variables={len(list(model.component_objects(Var)))}")
     return results,model
+
 
 
 class ValueFunction():
