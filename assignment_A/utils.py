@@ -26,6 +26,23 @@ def generate_time_series(T):
             price[t+1] = price_model(price[t], price[t-1],wind[t+1], data)
     return price, wind
 
+def generate_time_series_from_initial_state(wind_, price_, wind_previous, price_previous, L):
+    #added by Ø
+    price = np.zeros(L)
+    wind = np.zeros(L)
+    
+    wind[0] = wind_
+    price[0] = price_
+    
+    for t in range(L-1):
+        if t == 0:
+            wind[t+1] = wind_model(wind_, wind_previous, data)
+            price[t+1] = price_model(price_, price_previous,wind[t+1], data)
+        else:
+            wind[t+1] = wind_model(wind[t], wind[t-1], data)
+            price[t+1] = price_model(price[t], price[t-1],wind[t+1], data)
+    return price, wind
+
 
 def generate_experiment_series():
     # generate n truth scenarios to be used in all the tests
